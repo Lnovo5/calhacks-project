@@ -6,11 +6,11 @@ Team Members
 2. Mohammed Nihad
 3. Ethan Le
 4. Muhammad Bazil
-# Roles/Tasks TBD
+- Roles/Tasks TBD
 
 ## Tech
 Main Language: Python
-# TBD with team
+- TBD with team
 
 ## Setup
 
