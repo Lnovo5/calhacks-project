@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPA Knowledge Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+        }
+        .section-card {
+            background-color: #111827;
+            border: 2px solid #374151;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .warning-box {
+            background-color: #7f1d1d;
+            border: 3px solid #dc2626;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .info-box {
+            background-color: #1e3a8a;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #374151;
+        }
+        th {
+            background-color: #1f2937;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #1f2937;
+        }
+        .faq-item {
+            background-color: #1f2937;
+            border: 2px solid #374151;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            border-color: #06b6d4;
+        }
+        .faq-question {
+            padding: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+        .faq-question:hover {
+            background-color: #374151;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            padding: 0 1.25rem;
+            background-color: #111827;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 1.25rem;
+        }
+        .faq-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            color: #06b6d4;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-900 border-b-4 border-red-600 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-red-500">📚 CIPA Knowledge Center</h1>
+                <a href="index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all">
+                    ← Back to App
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Introduction -->
+        <div class="text-center mb-8">
+            <p class="text-xl text-gray-400">Comprehensive Guide to Congenital Insensitivity to Pain with Anhidrosis</p>
+        </div>
+
+        <div class="warning-box">
+            <p class="text-yellow-300 font-bold text-lg">⚠️ Important Medical Disclaimer</p>
+            <p class="text-red-200 mt-2">This information is for educational purposes only and should not replace professional medical advice. Always consult with qualified healthcare providers, including geneticists, neurologists, and orthopedic specialists for diagnosis and treatment decisions.</p>
+        </div>
+
+        <!-- What is CIP? -->
+        <div class="section-card">
+            <h2 class="text-3xl font-bold text-blue-400 mb-4">What is Congenital Insensitivity to Pain (CIP)?</h2>
+            <p class="text-gray-300 leading-relaxed mb-4">
+                CIP is a rare group of genetic disorders present from birth (congenital) where an individual cannot feel physical pain (analgesia). Pain is the body's natural alarm system; without it, individuals are at constant risk of severe, often undetected, injuries, burns, and infections. CIP is an umbrella term for several conditions, including its most well-known and severe subtype, CIPA.
+            </p>
+        </div>
+
+        <!-- What is CIPA? -->
+        <div class="section-card">
+            <h2 class="text-3xl font-bold text-yellow-400 mb-4">What is CIPA?</h2>
+            <p class="text-gray-300 leading-relaxed mb-4">
+                <strong class="text-yellow-500">CIPA</strong> stands for <strong>Congenital Insensitivity to Pain with Anhidrosis</strong>.
+            </p>
+            <div class="space-y-3 ml-4">
+                <div class="info-box">
+                    <p class="text-blue-200"><strong class="text-blue-400">Insensitivity to Pain:</strong> The inability to feel pain, temperature extremes (hot or cold), and deep pressure.</p>
+                </div>
+                <div class="info-box">
+                    <p class="text-blue-200"><strong class="text-blue-400">Anhidrosis:</strong> The inability to sweat, which prevents the body from naturally cooling itself.</p>
+                </div>
+            </div>
+            <p class="text-gray-400 mt-4 italic">
+                CIPA is also medically classified as <strong>Hereditary Sensory and Autonomic Neuropathy Type IV (HSAN IV)</strong>.
+            </p>
+        </div>
+
+        <!-- Genetic Basis -->
+        <div class="section-card">
+            <h2 class="text-3xl font-bold text-purple-400 mb-4">🔬 The Science: Genetic Basis</h2>
+            
+            <table class="text-gray-300">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Details</th>
+                        <th>Implication</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-bold text-purple-400">Genetic Cause</td>
+                        <td>A mutation in the <strong>NTRK1 gene</strong> (Neurotrophic Tyrosine Kinase Receptor Type 1) is the primary cause of CIPA.</td>
+                        <td>Other forms of CIP are caused by mutations in other genes (like SCN9A or PRDM12).</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-purple-400">Inheritance</td>
+                        <td><strong>Autosomal Recessive.</strong> The child must inherit a non-working copy of the NTRK1 gene from both parents (who are typically healthy carriers).</td>
+                        <td>The risk for a carrier couple to have an affected child is <strong>25%</strong> with each pregnancy.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-purple-400">Pathology</td>
+                        <td>The NTRK1 gene is essential for the survival and development of specific nerve cells: nociceptors (pain/temperature sensors) and nerves leading to the sweat glands.</td>
+                        <td>The mutation causes these critical nerve cells to fail to develop or die off, eliminating the ability to sense pain and regulate temperature.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Core Clinical Features -->
+        <div class="section-card">
+            <h2 class="text-3xl font-bold text-red-400 mb-4">⚠️ Core Clinical Features and Risks</h2>
+            <p class="text-gray-400 mb-6 italic">CIPA symptoms are present from infancy and require constant vigilance.</p>
+
+            <h3 class="text-2xl font-bold text-red-300 mb-3">1. The Absence of Pain (Insensitivity)</h3>
+            
+            <div class="space-y-4 ml-4">
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Unnoticed Trauma</h4>
+                    <p class="text-gray-300">Fractures, sprains, and internal injuries (like appendicitis) often go entirely unnoticed until swelling, disfigurement, or infection sets in.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Self-Mutilation</h4>
+                    <p class="text-gray-300">Infants and young children may chew on their lips, tongue, and fingers, causing severe tissue damage, including auto-amputation of digits or parts of the tongue.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Joint Destruction (Charcot Joints)</h4>
+                    <p class="text-gray-300">Repeated, unfelt trauma to joints (especially ankles, knees, and hips) prevents proper healing, leading to severe deformity, bone destruction, and disability.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Eye Damage</h4>
+                    <p class="text-gray-300">An absent corneal reflex means the eye does not automatically blink to protect itself, leading to corneal ulcers and potential vision loss from foreign objects or dryness.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Infections</h4>
+                    <p class="text-gray-300">Unnoticed wounds and chronic trauma greatly increase the risk of severe infections, particularly from <em>Staphylococcus aureus</em> bacteria, which can progress to osteomyelitis (bone infection) or sepsis.</p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-red-300 mb-3 mt-8">2. The Inability to Sweat (Anhidrosis)</h3>
+            
+            <div class="space-y-4 ml-4">
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Hyperthermia</h4>
+                    <p class="text-gray-300">The most life-threatening feature. The body cannot cool itself in warm weather, during exercise, or during illness, leading to rapid, extremely high fevers (hyperpyrexia).</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Febrile Seizures</h4>
+                    <p class="text-gray-300">High fevers can trigger seizures, especially in young children. Uncontrolled hyperthermia is a major cause of mortality in CIPA patients.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-yellow-400 mb-2">Other Features</h4>
+                    <p class="text-gray-300">Many CIPA patients also experience mild to moderate intellectual disability, hyperactivity, hypotonia (low muscle tone) in infancy, and thick, leathery skin (lichenification).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management and Prognosis -->
+        <div class="section-card">
+            <h2 class="text-3xl font-bold text-green-400 mb-4">✅ Management and Prognosis</h2>
+            <p class="text-gray-300 leading-relaxed mb-6">
+                There is currently <strong>no cure</strong> for CIP or CIPA. Management is entirely supportive and preventative.
+            </p>
+
+            <table class="text-gray-300">
+                <thead>
+                    <tr>
+                        <th>Focus Area</th>
+                        <th>Strategy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-bold text-green-400">Injury Prevention</td>
+                        <td>Daily, meticulous full-body checks for swelling, redness, or cuts. Environmental modification (padding sharp corners, using protective gear).</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-green-400">Thermal Regulation</td>
+                        <td>Constant temperature monitoring and avoiding heat exposure. Immediate cooling measures (cool baths, cooling vests) must be taken if a fever is detected.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-green-400">Orthopedics</td>
+                        <td>Immediate X-rays for any limb that appears swollen, red, or used differently. Splinting and casting must be done to ensure proper healing of fractures.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-green-400">Oral Health</td>
+                        <td>Frequent dental check-ups and smoothing sharp edges of teeth. Protective mouthguards for young children prone to self-biting.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-green-400">Prognosis</td>
+                        <td>Life expectancy has historically been reduced, with many complications arising early in childhood. However, with early diagnosis and rigorous multidisciplinary care, many individuals with CIPA can survive into adulthood with a significantly improved quality of life.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-green-400">Care Team</td>
+                        <td>Requires coordination among a Geneticist, Neurologist, Orthopedic Surgeon, Dentist, and Physical Therapist.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="section-card">
+            <h2 class="text-3xl font-bold text-cyan-400 mb-4">❓ Frequently Asked Questions (FAQ)</h2>
+            <p class="text-gray-400 mb-6 italic">Click on any question to expand the answer</p>
+            
+            <div class="space-y-3">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3 class="text-xl font-bold text-cyan-300">What is a Charcot Joint?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-gray-300">A Charcot joint is a progressive degenerative condition affecting joints, most commonly in CIPA patients. Repeated unfelt trauma to a joint causes the bones to weaken and break down, leading to severe deformity and disability. Early detection through regular orthopedic evaluation and X-rays is critical.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3 class="text-xl font-bold text-cyan-300">Why can't I cry or sweat?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-gray-300">The NTRK1 gene mutation in CIPA affects the development of autonomic nerves that control sweat glands. While many CIPA patients can produce tears when emotionally upset, they cannot produce sweat to cool their bodies, which is why temperature regulation is a life-threatening concern.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3 class="text-xl font-bold text-cyan-300">How do I check for a fracture without pain?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-gray-300">Look for these visual signs: unusual swelling, redness, warmth, bruising, deformity or unusual positioning of a limb, or if the person is avoiding using a limb. Any suspicion of injury requires immediate X-ray evaluation. Do not wait for pain to signal a problem.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3 class="text-xl font-bold text-cyan-300">Can CIPA be detected before birth?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-gray-300">Yes. If both parents are known carriers of the NTRK1 mutation, prenatal genetic testing (amniocentesis or chorionic villus sampling) can determine if the fetus has CIPA. Genetic counseling is highly recommended for at-risk families.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3 class="text-xl font-bold text-cyan-300">What is the life expectancy for someone with CIPA?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-gray-300">Historically, life expectancy was significantly reduced, with many complications in early childhood. However, with modern multidisciplinary care, early diagnosis, and rigorous preventative strategies, many individuals with CIPA now survive into adulthood. Prognosis depends heavily on the quality of care and prevention of complications.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3 class="text-xl font-bold text-cyan-300">Are there any treatments or cures being researched?</h3>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-gray-300">Currently, there is no cure for CIPA. Research is ongoing into gene therapy and other potential treatments, but management remains entirely supportive and preventative. Clinical trials and research studies may be available through specialized centers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Resources -->
+        <div class="section-card">
+            <h2 class="text-3xl font-bold text-orange-400 mb-4">🏥 Recommended Physicians & Resources</h2>
+            
+            <div class="space-y-4">
+                <div class="info-box">
+                    <h3 class="text-xl font-bold text-orange-300 mb-2">Essential Specialists</h3>
+                    <ul class="list-disc list-inside text-gray-300 space-y-1 ml-4">
+                        <li><strong>Geneticist:</strong> For diagnosis confirmation and genetic counseling</li>
+                        <li><strong>Neurologist:</strong> For ongoing neurological assessment and management</li>
+                        <li><strong>Orthopedic Surgeon:</strong> Specializing in Charcot joints and bone health</li>
+                        <li><strong>Dentist/Oral Surgeon:</strong> Regular monitoring and preventative care</li>
+                        <li><strong>Physical Therapist:</strong> Joint protection and mobility strategies</li>
+                        <li><strong>Dermatologist:</strong> Skin and wound care management</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold text-orange-300 mb-3">National Organizations & Support</h3>
+                    <p class="text-gray-400 mb-3">Connect with these organizations for support, research updates, and community:</p>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                        <li><strong>National Organization for Rare Disorders (NORD)</strong> - Comprehensive rare disease information and support</li>
+                        <li><strong>Genetic and Rare Diseases Information Center (GARD)</strong> - NIH resource for rare genetic conditions</li>
+                        <li><strong>CIPA-specific support groups</strong> - Search for online communities and family networks</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box mt-6">
+                    <p class="text-yellow-300 font-bold">⚠️ Important Note</p>
+                    <p class="text-red-200 mt-2">Always consult with physicians who have specific experience with CIPA or rare genetic neuropathies. Local specialists should work in coordination with a multidisciplinary team familiar with the unique challenges of CIPA management.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to App Button -->
+        <div class="text-center py-8">
+            <a href="index.html" class="inline-block px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-lg transition-all shadow-lg">
+                ← Return to CIPA Watch App
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t-2 border-gray-800 mt-12 py-6">
+        <div class="max-w-4xl mx-auto px-4 text-center text-gray-500">
+            <p>CIPA Watch - Educational Resource for CIPA Management</p>
+            <p class="text-sm mt-2">This information is for educational purposes only. Always consult qualified medical professionals.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            const allFAQs = document.querySelectorAll('.faq-item');
+            
+            // Close all other FAQs
+            allFAQs.forEach(item => {
+                if (item !== faqItem && item.classList.contains('active')) {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Toggle current FAQ
+            faqItem.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

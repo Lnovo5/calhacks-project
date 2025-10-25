@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CIPA Watch — Sign in</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="CIPA Watch login using Firebase Authentication" />
+</head>
+<body class="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center">
+  <div class="w-full max-w-3xl p-6">
+    <div class="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-950 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="md:flex">
+        <!-- Left pane: branding/info -->
+        <div class="hidden md:block md:w-1/2 bg-red-900/10 p-8">
+          <div class="flex flex-col h-full justify-between">
+            <div>
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white text-2xl font-bold shadow">
+                  CW
+                </div>
+                <div>
+                  <h1 class="text-2xl font-extrabold text-red-400">CIPA Watch</h1>
+                  <p class="text-sm text-gray-300">Temperature • Hydration • Injury Monitoring</p>
+                </div>
+              </div>
+
+              <p class="text-sm text-gray-300 leading-relaxed">
+                Sign in to manage timers, log checks, and review healing suggestions. Use a caregiver or clinician account for broader access.
+              </p>
+
+              <ul class="mt-6 space-y-3 text-sm text-gray-300">
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-red-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M12 2v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 12a8 8 0 10-16 0 8 8 0 0016 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Allow browser notifications for alarm reminders.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-red-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Logs will sync across devices when Firestore is enabled.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="mt-6 text-xs text-gray-400">
+              <a href="/knowledge.html" class="text-red-300 underline">CIPA Knowledge Center</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right pane: forms -->
+        <div class="w-full md:w-1/2 p-8">
+          <div class="mb-6 text-center md:text-left">
+            <div class="md:hidden flex items-center justify-center mb-4">
+              <div class="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center text-2xl font-bold shadow">CW</div>
+            </div>
+            <h2 class="text-2xl font-bold text-white">Sign in to CIPA Watch</h2>
+            <p class="text-sm text-gray-400 mt-2">For caregivers, guardians and approved patients.</p>
+          </div>
+
+          <div id="flash" class="mb-4 hidden p-3 rounded text-sm"></div>
+
+          <!-- Sign-in form -->
+          <form id="loginForm" class="space-y-4" novalidate>
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+              <input id="email" type="email" required placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+              <p id="emailError" class="text-red-400 text-xs mt-1 hidden"></p>
+            </div>
+
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+              <div class="relative mt-1">
+                <input id="password" type="password" required placeholder="••••••••" class="w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+                <button type="button" id="togglePassword" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200">
+                  <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 012.223-3.555M3 3l18 18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-sm text-gray-300">
+              <label class="flex items-center gap-2">
+                <input id="remember" type="checkbox" class="h-4 w-4 rounded bg-gray-700 accent-red-500 border-gray-600" />
+                <span>Remember me</span>
+              </label>
+              <a href="#" id="showReset" class="text-red-400 hover:underline">Forgot password?</a>
+            </div>
+
+            <div>
+              <button id="loginBtn" type="submit" class="w-full rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 font-semibold text-white focus:outline-none focus:ring-2 focus:ring-red-500">Sign in</button>
+            </div>
+
+            <div class="text-center text-xs text-gray-500">
+              <p>New to CIPA Watch?
+                <button type="button" id="showSignUp" class="text-red-300 underline">Create an account</button>
+              </p>
+            </div>
+          </form>
+
+          <!-- Sign-up form (hidden by default) -->
+          <form id="signupForm" class="space-y-4 hidden" novalidate>
+            <div>
+              <label for="suEmail" class="block text-sm font-medium text-gray-300">Email</label>
+              <input id="suEmail" type="email" required placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+            </div>
+
+            <div>
+              <label for="suPassword" class="block text-sm font-medium text-gray-300">Password</label>
+              <input id="suPassword" type="password" required placeholder="Min 6 characters" class="mt-1 w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+            </div>
+
+            <div>
+              <label for="role" class="block text-sm font-medium text-gray-300">I am signing up as</label>
+              <select id="role" class="mt-1 w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="guardian">Guardian / Caregiver</option>
+                <option value="patient">Patient</option>
+                <option value="clinician">Clinician</option>
+              </select>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="createBtn" type="submit" class="flex-1 rounded-lg bg-green-600 hover:bg-green-700 px-4 py-2 font-semibold text-white">Create account</button>
+              <button id="cancelSignUp" type="button" class="flex-1 rounded-lg bg-gray-700 hover:bg-gray-600 px-4 py-2 text-gray-200">Cancel</button>
+            </div>
+          </form>
+
+          <!-- Password reset form (hidden by default) -->
+          <form id="resetForm" class="space-y-4 hidden" novalidate>
+            <div>
+              <label for="resetEmail" class="block text-sm font-medium text-gray-300">Email for password reset</label>
+              <input id="resetEmail" type="email" required placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+            </div>
+            <div class="flex gap-2">
+              <button id="sendReset" type="submit" class="flex-1 rounded-lg bg-yellow-600 hover:bg-yellow-700 px-4 py-2 font-semibold text-white">Send reset link</button>
+              <button id="cancelReset" type="button" class="flex-1 rounded-lg bg-gray-700 hover:bg-gray-600 px-4 py-2 text-gray-200">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 text-center text-xs text-gray-500">
+      <p>&copy; <span id="year"></span> CIPA Watch — Designed for safety and caregiver support.</p>
+    </div>
+  </div>
+
+  <!-- Firebase config file (local module) and auth script -->
+  <script type="module" src="/auth.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
