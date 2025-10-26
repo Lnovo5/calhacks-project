@@ -6,6 +6,9 @@ Team Members
 2. Ethan Le
 3. Muhammad Bazil
 - Roles/Tasks TBD
+1. Lucia Novo - Backend/Project manager.
+2. Muhammad Bazil - Frontend/Debugger.
+3. Ethan Lee - Project coordinator / Reseacher.
 
 ## Tech
 - Claude AI
