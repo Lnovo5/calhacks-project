@@ -1,12 +1,20 @@
-// Replace the placeholders with your Firebase project's web app config.
-// Create a web app in the Firebase Console and copy the config here.
-// Do NOT commit real keys to public repos if you want privacy; the config is okay client-side but protect other server secrets.
+// This file centralizes your Firebase setup for all other files to import.
 
-export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+// Firebase config (Copy the config object from your login-auth.js)
+const firebaseConfig = {
+  apiKey: "AIzaSyBk-tOaFVH7x3i9Q3FhQfw8tHPwDoGMCuA",
+  authDomain: "cip-helper-calhacks.firebaseapp.com",
+  projectId: "cip-helper-calhacks",
+  storageBucket: "cip-helper-calhacks.firebasestorage.app",
+  messagingSenderId: "982066367195",
+  appId: "1:982066367195:web:a64d3cfe49f60a0dc7dafe"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
