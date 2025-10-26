@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPA Watch App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="injury-log.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut 
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc,
+            deleteDoc,
+            doc,
+            getDocs, 
+            query, 
+            orderBy,
+            serverTimestamp
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // 4. FIREBASE CONFIG AND INITIALIZATION (from login-auth.js)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBk-tOaFVH7x3i9Q3FhQfw8tHPwDoGMCuA",
+            authDomain: "cip-helper-calhacks.firebaseapp.com",
+            projectId: "cip-helper-calhacks",
+            storageBucket: "cip-helper-calhacks.firebasestorage.app",
+            messagingSenderId: "982066367195",
+            appId: "1:982066367195:web:a64d3cfe49f60a0dc7dafe"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // 5. CORE JAVASCRIPT LOGIC
+
+        let timeRemaining = 1800; // 30 minutes default
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let alarmAudio = null;
+        
+        // --- Authentication Check ---
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = './login.html';
+            } else {
+                console.log('✅ User authenticated:', user.uid);
+                loadInjuryHistory();
+            }
+        });
+
+        // --- Timer Logic ---
+       /* const initialTime = 1800; // 30 minutes in seconds
+        let timeRemaining = initialTime;
+        let timerInterval;*/
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('time-remaining').textContent = display;
+            
+            // Update color based on time
+            const timerEl = document.getElementById('timer-status');
+            timerEl.classList.remove('bg-green-700', 'bg-yellow-700', 'bg-red-700');
+            if (timeRemaining > 600) {
+                timerEl.classList.add('bg-green-700');
+            } else if (timeRemaining > 300) {
+                timerEl.classList.add('bg-yellow-700');
+            } else {
+                timerEl.classList.add('bg-red-700');
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            isTimerRunning = true;
+            
+            document.getElementById('startTimerBtn').classList.add('hidden');
+            document.getElementById('pauseTimerBtn').classList.remove('hidden');
+            document.getElementById('alarm-status').innerHTML = '<span class="text-green-500">ACTIVE</span> (Monitoring)';
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timeRemaining = 0;
+                    triggerAlarm();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isTimerRunning = false;
+            
+            document.getElementById('startTimerBtn').classList.remove('hidden');
+            document.getElementById('pauseTimerBtn').classList.add('hidden');
+            document.getElementById('alarm-status').innerHTML = '<span class="text-yellow-500">PAUSED</span> (Timer Stopped)';
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeRemaining = 1800;
+            updateTimerDisplay();
+        }
+
+        function setCustomTime() {
+            const minutes = parseInt(prompt('Enter minutes for timer (1-60):', '30'));
+            if (minutes && minutes > 0 && minutes <= 60) {
+                pauseTimer();
+                timeRemaining = minutes * 60;
+                updateTimerDisplay();
+                alert(`Timer set to ${minutes} minutes`);
+            }
+        }
+
+        function triggerAlarm() {
+            isTimerRunning = false;
+            document.getElementById('alarm-status').innerHTML = '<span class="text-red-500 animate-pulse">ALARM!</span> (Check Required)';
+            
+            // Play alarm sound
+            if (!alarmAudio) {
+                alarmAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE=');
+            }
+            alarmAudio.play().catch(e => console.log('Audio play failed:', e));
+            
+            // Browser notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('⚠️ CIPA Watch Alarm!', {
+                    body: 'Time to check for injuries! Inspect your body carefully.',
+                    requireInteraction: true,
+                    tag: 'cipa-alarm'
+                });
+            }
+
+            // Show modal
+            document.getElementById('alarmModal').classList.remove('hidden');
+        }
+
+        function acknowledgeAlarm() {
+            document.getElementById('alarmModal').classList.add('hidden');
+            resetTimer();
+            document.getElementById('alarm-status').innerHTML = '<span class="text-gray-500">INACTIVE</span> (Acknowledged)';
+        }
+
+        // Injury Log Functions
+        async function saveInjuryLog(e) {
+            e.preventDefault();
+            
+            const user = auth.currentUser;
+            if (!user) {
+                alert('You must be logged in to save injuries.');
+                return;
+            }
+
+            const location = document.getElementById('location').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+            
+            if (!location || !notes) {
+                alert('Please fill in both location and notes.');
+                return;
+            }
+
+            try {
+                const injuryId = `injury_${Date.now()}`;
+                const injuryData = {
+                    id: injuryId,
+                    location: location,
+                    notes: notes,
+                    timestamp: Date.now()
+                };
+
+                const injuryDocRef = doc(db, 'users', user.uid, 'injuries', injuryId);
+                await setDoc(injuryDocRef, injuryData);
+                
+                console.log('✅ Injury saved:', injuryData);
+                
+                // Clear form
+                document.getElementById('location').value = '';
+                document.getElementById('notes').value = '';
+                
+                // Show success message
+                alert('Injury report saved successfully!');
+                
+                // Reload history
+                await loadInjuryHistory();
+                
+            } catch (error) {
+                console.error('❌ Error saving injury:', error);
+                alert('Failed to save injury. Please try again.');
+            }
+        }
+
+        async function loadInjuryHistory() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const injuryCollection = collection(db, 'users', user.uid, 'injuries');
+                const q = query(injuryCollection, orderBy('timestamp', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                const injuries = [];
+                querySnapshot.forEach((doc) => {
+                    injuries.push(doc.data());
+                });
+                
+                renderInjuryHistory(injuries);
+                
+            } catch (error) {
+                console.error('❌ Error loading injuries:', error);
+                document.getElementById('history-status').textContent = 'Error loading injury history.';
+            }
+        }
+
+        function renderInjuryHistory(injuries) {
+            const container = document.getElementById('injury-history-container');
+            const statusEl = document.getElementById('history-status');
+            
+            if (injuries.length === 0) {
+                statusEl.textContent = 'No injury reports yet. Add your first one above!';
+                container.innerHTML = '';
+                container.classList.add('hidden');
+                return;
+            }
+            
+            statusEl.textContent = `Showing ${injuries.length} injury report(s)`;
+            container.classList.remove('hidden');
+            
+            container.innerHTML = injuries.map(injury => `
+                <div class="bg-gray-800 p-6 rounded-xl shadow-xl border-l-4 border-yellow-500">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-yellow-500"></i>
+                            <h3 class="text-xl font-bold text-yellow-400">${injury.location}</h3>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-gray-400">${formatDate(injury.timestamp)}</span>
+                            <button onclick="deleteInjury('${injury.id}')" class="text-red-400 hover:text-red-300 transition" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-300 leading-relaxed ml-7">${injury.notes}</p>
+                  
+                    <div class="bg-blue-950 border-l-4 border-blue-500 rounded p-4 mt-4">
+                        <p class="text-sm text-blue-200 leading-relaxed">
+                            ${getHealingSuggestion(injury.location, injury.notes)}
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        window.deleteInjury = async function(injuryId) {
+            if (!confirm('Are you sure you want to delete this injury report?')) {
+                return;
+            }
+            
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const injuryDocRef = doc(db, 'users', user.uid, 'injuries', injuryId);
+                await deleteDoc(injuryDocRef);
+                
+                console.log('✅ Injury deleted:', injuryId);
+                await loadInjuryHistory();
+                
+            } catch (error) {
+                console.error('❌ Error deleting injury:', error);
+                alert('Failed to delete injury.');
+            }
+        };
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 14) return '1 week ago';
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function getHealingSuggestion(location, notes) {
+            const lowerNotes = (notes || '').toLowerCase();
+            const lowerLocation = (location || '').toLowerCase();
+            
+            if (lowerLocation.includes('joint') || lowerLocation.includes('knee') || 
+                lowerLocation.includes('ankle') || lowerLocation.includes('elbow')) {
+                return "🦴 Joint/Bone Concern: Monitor closely for swelling or deformity. Avoid weight-bearing if possible. Seek medical evaluation for any joint instability.";
+            }
+            
+            if (lowerNotes.includes('burn') || lowerNotes.includes('hot') || lowerNotes.includes('heat')) {
+                return "🔥 Thermal Injury: Apply cool water immediately. Keep clean and covered. Monitor for blistering or infection. Consult doctor if not improving in 48 hours.";
+            }
+            
+            if (lowerNotes.includes('swelling') || lowerNotes.includes('swollen')) {
+                return "⚠️ Swelling Detected: Elevate the area and apply ice (with timer!). Monitor for warmth indicating infection. Avoid pressure until evaluated.";
+            }
+            
+            if (lowerNotes.includes('red') || lowerNotes.includes('redness')) {
+                return "🔴 Redness Noted: Keep area clean. Watch for spreading redness or warmth. Take daily photos to track. Seek medical attention if spreading.";
+            }
+            
+            if (lowerLocation.includes('mouth') || lowerLocation.includes('teeth') || lowerLocation.includes('tongue')) {
+                return "🦷 Oral Injury: Rinse with salt water. Avoid hot foods. Schedule dental check-up. May require protective measures.";
+            }
+            
+            return "⚕️ General Care: Clean gently with mild soap. Apply antibiotic ointment and bandage. Check daily for infection signs. Document with photos. Contact healthcare provider if not improving in 3-5 days.";
+        }
+
+        window.toggleMenu = () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        };
+
+        window.handleSignOut = async () => {
+            try {
+                await signOut(auth);
+                window.location.href = './login.html';
+            } catch (error) {
+                console.error("Sign Out Error:", error);
+                alert("Failed to sign out.");
+            }
+        };
+
+        // Expose timer functions to window
+        window.startTimer = startTimer;
+        window.pauseTimer = pauseTimer;
+        window.resetTimer = resetTimer;
+        window.setCustomTime = setCustomTime;
+        window.acknowledgeAlarm = acknowledgeAlarm;
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTimerDisplay();
+            lucide.createIcons();
+            
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            // Add form submit handler
+            document.getElementById('injuryForm').addEventListener('submit', saveInjuryLog);
+        });
+    </script>
+</head>
+
+<body class="min-h-screen bg-gray-950 text-gray-100 font-sans">
+
+    <!-- Alarm Modal -->
+    <div id="alarmModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+        <div class="bg-red-600 rounded-2xl p-8 max-w-md w-full mx-4 text-center animate-pulse">
+            <div class="text-6xl mb-4">🔔</div>
+            <h2 class="text-3xl font-bold mb-4">ALARM!</h2>
+            <p class="text-xl mb-6">Time to check for injuries!</p>
+            <button onclick="acknowledgeAlarm()" class="w-full bg-white text-red-600 font-bold py-4 px-6 rounded-lg hover:bg-gray-100 text-xl">
+                Acknowledge & Check Body
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden fixed inset-0 bg-gray-950/95 z-40 p-6 md:hidden">
+        <div class="flex justify-end">
+            <button onclick="toggleMenu()" class="text-gray-300 hover:text-white transition">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+        </div>
+        <nav class="mt-8 space-y-4 text-center">
+            <a href="#monitor" onclick="toggleMenu()" class="block py-3 text-2xl font-semibold text-red-400 hover:text-red-300">Monitor</a>
+            <a href="#report" onclick="toggleMenu()" class="block py-3 text-2xl font-semibold text-yellow-400 hover:text-yellow-300">Report Injury</a>
+            <a href="#history" onclick="toggleMenu()" class="block py-3 text-2xl font-semibold text-blue-400 hover:text-blue-300">History</a>
+            <a href="knowledge.html" class="block py-3 text-2xl font-semibold text-gray-400 hover:text-white">Knowledge Center</a>
+            <button onclick="handleSignOut()" class="mt-8 w-full py-3 bg-red-700 hover:bg-red-600 text-white font-bold text-xl rounded-lg transition-all">
+                Sign Out
+            </button>
+        </nav>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center border-b-2 border-gray-800 pb-4 mb-8">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                    CW
+                </div>
+                <h1 class="text-3xl font-extrabold text-red-500">CIPA Watch</h1>
+            </div>
+            <nav class="hidden md:flex gap-6">
+                <a href="#monitor" class="text-gray-300 hover:text-red-400 transition">Monitor</a>
+                <a href="#report" class="text-gray-300 hover:text-yellow-400 transition">Report</a>
+                <a href="#history" class="text-gray-300 hover:text-blue-400 transition">History</a>
+            </nav>
+            <button onclick="handleSignOut()" class="hidden md:inline-block px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-all">
+                Sign Out
+            </button>
+            <button onclick="toggleMenu()" class="md:hidden text-gray-300 hover:text-white transition">
+                <i data-lucide="menu" class="w-7 h-7"></i>
+            </button>
+        </header>
+
+
+        <!-- Monitor Section -->
+        <section id="monitor" class="mb-12">
+            <h2 class="text-2xl font-bold text-red-400 mb-6 flex items-center gap-3">
+                <i data-lucide="alert-circle" class="w-6 h-6"></i>
+                Real-Time Monitoring
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Alarm Status -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-xl border-l-4 border-red-500">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xl font-semibold text-gray-300">Alarm Status</span>
+                        <i data-lucide="bell" class="w-6 h-6 text-red-400"></i>
+                    </div>
+                    <p id="alarm-status" class="mt-2 text-2xl font-extrabold">
+                        <span class="text-gray-500">INACTIVE</span> (Not Started)
+                    </p>
+                    <p class="text-sm text-gray-400 mt-1">Start timer to activate monitoring.</p>
+                </div>
+                
+                <!-- Timer -->
+                <div id="timer-status" class="bg-green-700 p-6 rounded-xl shadow-xl border-l-4 border-white-500 transition-colors duration-500">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xl font-semibold text-white">Time Until Next Check</span>
+                        <i data-lucide="clock" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <p id="time-remaining" class="mt-2 text-4xl font-extrabold text-white font-mono">30:00</p>
+                    <p class="text-sm text-white/80 mt-1">Default check interval is 30 minutes.</p>
+                </div>
+            </div>
+            
+            <!-- Timer Controls -->
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <button id="startTimerBtn" onclick="startTimer()" class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition flex items-center justify-center gap-2">
+                    <i data-lucide="play" class="w-5 h-5"></i>
+                    Start
+                </button>
+                <button id="pauseTimerBtn" onclick="pauseTimer()" class="hidden px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg transition flex items-center justify-center gap-2">
+                    <i data-lucide="pause" class="w-5 h-5"></i>
+                    Pause
+                </button>
+                <button onclick="resetTimer()" class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition flex items-center justify-center gap-2">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                    Reset
+                </button>
+                <button onclick="setCustomTime()" class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center justify-center gap-2">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    Set Time
+                </button>
+            </div>
+        </section>
+
+
+        <!-- Report Section -->
+        <section id="report" class="mb-12 pt-8 border-t-2 border-gray-800">
+            <h2 class="text-2xl font-bold text-yellow-400 mb-6 flex items-center gap-3">
+                <i data-lucide="send" class="w-6 h-6"></i>
+                Report New Injury
+            </h2>
+
+            <form id="injuryForm" class="bg-gray-800 p-6 rounded-xl shadow-xl space-y-4">
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-300 mb-1">Injury Location</label>
+                    <input id="location" type="text" placeholder="e.g., Left Foot, Right Hand, Knee" required class="w-full rounded-lg bg-gray-900 border border-gray-700 px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                </div>
+                
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-300 mb-1">Detailed Notes</label>
+                    <textarea id="notes" rows="4" placeholder="Describe: redness, swelling, cuts, burns, or any unusual appearance..." required class="w-full rounded-lg bg-gray-900 border border-gray-700 px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"></textarea>
+                </div>
+
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-bold text-lg rounded-lg transition-all shadow-md">
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    Save Injury Report
+                </button>
+            </form>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="mb-12 pt-8 border-t-2 border-gray-800">
+            <h2 class="text-2xl font-bold text-blue-400 mb-6 flex items-center gap-3">
+                <i data-lucide="calendar" class="w-6 h-6"></i>
+                Injury History
+            </h2>
+            
+            <p id="history-status" class="text-gray-500 text-center mb-6">Loading injury history...</p>
+
+            <div id="injury-history-container" class="space-y-6 hidden"></div>
+        </section>
+
+        <!-- Knowledge Center Link -->
+        <div class="text-center py-8 border-t-2 border-gray-800">
+            <p class="text-gray-400 mb-4 text-lg">Need comprehensive information about CIPA?</p>
+            <a href="knowledge.html" class="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-lg transition-all shadow-lg">
+                📚 Visit CIPA Knowledge Center
+            </a>
+        </div>
+
+    </div>
+</body>
+</html>
