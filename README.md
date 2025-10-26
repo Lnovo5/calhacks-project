@@ -15,9 +15,9 @@ Team Members
 ## Setup
 
 ## Plan
-Backend - Lucia Novi
-Frontend - Muhammad Bazil
-Reseaser / Critical thinker - Ethan Le
+Backend - Lucia Novi.
+Frontend - Muhammad Bazil.
+Researcher / Critical thinker - Ethan Le.
 
 CIP - Congenital Insensitivity to Pain
 - Using AI to help people with this condition
