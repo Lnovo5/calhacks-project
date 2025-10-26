@@ -66,7 +66,7 @@
           <div id="flash" class="mb-4 hidden p-3 rounded text-sm"></div>
 
           <!-- Sign-in form -->
-          <form id="loginForm" class="space-y-4" novalidate>
+          <form id="loginForm" class="space-y-4" novalidate data-redirect="./CIPA.html">
             <div>
               <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
               <input id="email" type="email" required placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-gray-800 border border-gray-700 px-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
@@ -155,8 +155,45 @@
     </div>
   </div>
 
-  <!-- Firebase config file (local module) and auth script -->
-  <script type="module" src="/auth.js"></script>
+  <!-- Firebase config file (local module) and auth script (loaded dynamically to catch duplicate/parse errors) -->
+  <script type="module">
+  // Dynamic loader: imports login-auth.js and surfaces parse/load errors to the UI
+  (async function () {
+    const flash = document.getElementById('flash');
+    function showFlash(msg, isError = true) {
+      if (!flash) return console.warn(msg);
+      flash.classList.remove('hidden');
+      flash.textContent = msg;
+      flash.classList.toggle('bg-red-600', isError);
+      flash.classList.toggle('bg-green-600', !isError);
+      flash.classList.toggle('text-white', true);
+    }
+
+    // Detect duplicate script tags that might cause double execution
+    const src = './login-auth.js';
+    const scripts = Array.from(document.querySelectorAll('script[src]')).filter(s => s.getAttribute('src') === src);
+    if (scripts.length > 1) {
+      const msg = `Duplicate loader detected for ${src} (${scripts.length} instances). This can cause "Identifier 'auth' has already been declared".`;
+      console.error(msg, scripts);
+      showFlash(msg);
+      // continue to attempt import once
+    }
+
+    try {
+      const mod = await import(src);
+      console.log('[login.html] loaded', src, mod);
+      // Optionally notify other code of success
+      window.dispatchEvent(new CustomEvent('auth:moduleLoaded', { detail: { src } }));
+    } catch (err) {
+      // SyntaxError (like duplicate declaration) will be caught here
+      console.error('[login.html] failed to load', src, err);
+      showFlash('Failed to load authentication module: ' + (err && err.message ? err.message : String(err)));
+      // Surface to any existing auth:error handlers
+      window.dispatchEvent(new CustomEvent('auth:error', { detail: { message: err && err.message ? err.message : String(err), original: err } }));
+    }
+  })();
+  </script>
+
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
